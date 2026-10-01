@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HX CAPTURE | Hashir - Video Editor, Photographer & Designer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0A0C10',
+                            card: '#12161F',
+                            border: '#1E2638',
+                            blue: '#00F0FF',
+                            deepBlue: '#0066FF',
+                            accentGlow: 'rgba(0, 240, 255, 0.15)',
+                        }
+                    },
+                    fontFamily: {
+                        syne: ['Syne', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'glow-sm': '0 0 15px rgba(0, 240, 255, 0.25)',
+                        'glow-md': '0 0 30px rgba(0, 240, 255, 0.35)',
+                        'glow-lg': '0 0 50px rgba(0, 240, 255, 0.45)',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS styles and glassmorphism styling -->
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0C10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E2638;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00F0FF;
+        }
+
+        /* Glassmorphism styling */
+        .glass-card {
+            background: rgba(18, 22, 31, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        
+        .glass-nav {
+            background: rgba(10, 12, 16, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow-1 {
+            background: radial-gradient(circle, rgba(0,240,255,0.12) 0%, rgba(0,102,255,0.05) 50%, rgba(10,12,16,0) 70%);
+        }
+        .ambient-glow-2 {
+            background: radial-gradient(circle, rgba(0,102,255,0.15) 0%, rgba(0,240,255,0.03) 50%, rgba(10,12,16,0) 70%);
+        }
+
+        /* Glow Text Effect */
+        .text-glow {
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Reveal Animation Classes */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Cursor Dot (Desktop) */
+        @media (min-width: 1024px) {
+            .custom-cursor {
+                pointer-events: none;
+                position: fixed;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                border: 2px solid #00F0FF;
+                transition: transform 0.15s ease-out, background-color 0.15s ease-out;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+            }
+            .custom-cursor-dot {
+                pointer-events: none;
+                position: fixed;
+                width: 6px;
+                height: 6px;
+                background-color: #00F0FF;
+                border-radius: 50%;
+                z-index: 10000;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        /* Admin panel */
+        .hxcapture-modal { display:none; }
+        .hxcapture-modal.active { display:flex; }
+        .hxcapture-item { border:1px solid rgba(255,255,255,.08); background:rgba(18,22,31,.7); }
+        .hxcapture-input { width:100%; background:#0A0C10; border:1px solid #1E2638; border-radius:.75rem; padding:.75rem 1rem; color:#fff; outline:none; }
+        .hxcapture-input:focus { border-color:#00F0FF; }
+        .hxcapture-preview { width:100%; aspect-ratio:16/9; object-fit:cover; border-radius:.75rem; border:1px solid rgba(255,255,255,.08); }
+        .achievement-card { transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease; }
+        .achievement-card:hover { transform: translateY(-6px); border-color: rgba(0,240,255,.45); box-shadow: 0 0 28px rgba(0,240,255,.16); }
+        .achievement-image { aspect-ratio: 4/3; object-fit: cover; }
+        .cursor-hover { transform: translate(-50%, -50%) scale(1.45); background: rgba(0,240,255,.08); }
+    </style>
+</head>
+<body class="bg-brand-dark text-slate-100 font-sans antialiased overflow-x-hidden selection:bg-brand-blue selection:text-black">
+
+    <!-- Custom Cursor -->
+    <div id="cursor" class="custom-cursor hidden lg:block"></div>
+    <div id="cursor-dot" class="custom-cursor-dot hidden lg:block"></div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-3 bg-brand-card border border-brand-blue/40 text-white px-5 py-3.5 rounded-xl shadow-glow-sm">
+        <i class="fa-solid fa-circle-check text-brand-blue text-lg"></i>
+        <span id="toast-message" class="text-sm font-medium">Message sent successfully!</span>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="fixed top-0 left-0 w-full z-40 glass-nav transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo with Image Integration -->
+            <a href="#hero" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl overflow-hidden bg-gradient-to-tr from-brand-deepBlue to-brand-blue flex items-center justify-center shadow-glow-sm group-hover:scale-105 transition-transform duration-300 border border-brand-blue/30">
+                    <img src="logo.png" alt="HX CAPTURE Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'font-syne font-extrabold text-black text-xl\'>HX</span>';">
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-syne text-xl font-bold tracking-wider text-white group-hover:text-brand-blue transition-colors">HX CAPTURE</span>
+                    <span class="text-[10px] uppercase tracking-widest text-slate-400 font-medium">By Hashir</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+                <a href="#about" class="hover:text-brand-blue transition-colors">About</a>
+                <a href="#portfolio" class="hover:text-brand-blue transition-colors">Portfolio</a>
+                <a href="#achievements" class="hover:text-brand-blue transition-colors">Achievements</a>
+                <a href="#services" class="hover:text-brand-blue transition-colors">Services</a>
+                <a href="#skills" class="hover:text-brand-blue transition-colors">Skills</a>
+                <a href="#workflow" class="hover:text-brand-blue transition-colors">Workflow</a>
+                <a href="#testimonials" class="hover:text-brand-blue transition-colors">Reviews</a>
+            </nav>
+
+            <!-- Header Action Buttons -->
+            <div class="hidden md:flex items-center gap-3">
+                <button id="hxcapture-login-btn" type="button" class="px-4 py-2.5 rounded-xl border border-brand-blue/40 text-brand-blue text-sm font-semibold hover:bg-brand-blue hover:text-black transition-all duration-300">
+                    <i class="fa-solid fa-lock mr-2"></i>Admin
+                </button>
+                <a href="#contact" class="px-5 py-2.5 rounded-xl border border-brand-blue/50 text-brand-blue text-sm font-semibold hover:bg-brand-blue hover:text-black transition-all duration-300 shadow-glow-sm hover:shadow-glow-md">
+                    Let's Talk
+                </a>
+            </div>
+
+            <!-- Mobile Hamburger Button -->
+            <button id="menu-btn" class="md:hidden text-slate-200 text-2xl focus:outline-none p-2" aria-label="Toggle Navigation">
+                <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay -->
+        <div id="mobile-menu" class="hidden md:hidden glass-card border-b border-brand-border px-6 py-6 transition-all duration-300">
+            <div class="flex flex-col gap-4 text-base font-medium text-slate-200">
+                <a href="#about" class="mobile-nav-link hover:text-brand-blue">About</a>
+                <a href="#portfolio" class="mobile-nav-link hover:text-brand-blue">Portfolio</a>
+                <a href="#achievements" class="mobile-nav-link hover:text-brand-blue">Achievements</a>
+                <a href="#services" class="mobile-nav-link hover:text-brand-blue">Services</a>
+                <a href="#skills" class="mobile-nav-link hover:text-brand-blue">Skills</a>
+                <a href="#workflow" class="mobile-nav-link hover:text-brand-blue">Workflow</a>
+                <a href="#testimonials" class="mobile-nav-link hover:text-brand-blue">Reviews</a>
+                <button id="hxcapture-login-btn-mobile" type="button" class="text-left hover:text-brand-blue">
+                    <i class="fa-solid fa-lock mr-2"></i>Admin Login
+                </button>
+                <a href="#contact" class="mobile-nav-link inline-block text-center mt-2 px-5 py-3 rounded-xl bg-brand-blue text-black font-semibold shadow-glow-sm">Contact Me</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="hero" class="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden">
+        <!-- Ambient Glowing Orbs -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] ambient-glow-1 pointer-events-none rounded-full"></div>
+        <div class="absolute bottom-10 right-10 w-[400px] h-[400px] ambient-glow-2 pointer-events-none rounded-full"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Hero Left Content -->
+                <div class="lg:col-span-7 text-center lg:text-left space-y-6">
+                    <!-- Status Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-card border-brand-blue/30 text-xs font-semibold text-brand-blue tracking-wider uppercase">
+                        <span class="w-2 h-2 rounded-full bg-brand-blue animate-ping"></span>
+                        <span>Available for Freelance & Projects</span>
+                    </div>
+
+                    <!-- Main Headline -->
+                    <h1 class="font-syne text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1]">
+                        I CREATE.<br>
+                        I EDIT.<br>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-blue via-cyan-300 to-brand-deepBlue text-glow">
+                            I CAPTURE.
+                        </span>
+                    </h1>
+
+                    <!-- Subheading & Short Intro -->
+                    <p class="text-lg sm:text-xl font-semibold text-slate-300 tracking-wide">
+                        Video Editor &bull; Photographer &bull; Graphic Designer
+                    </p>
+                    <p class="text-slate-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                        I turn ideas into cinematic visuals, engaging videos, and professional designs that elevate brands and captivate audiences.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                        <a href="#portfolio" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-blue to-brand-deepBlue text-black font-bold text-center hover:scale-105 transition-all duration-300 shadow-glow-md flex items-center justify-center gap-2">
+                            <span>View My Work</span>
+                            <i class="fa-solid fa-arrow-right text-sm"></i>
+                        </a>
+                        <a href="#contact" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-card text-white font-semibold text-center hover:bg-white/10 hover:border-brand-blue/50 transition-all duration-300 flex items-center justify-center gap-2">
+                            <span>Get In Touch</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hero Right Card / Graphic -->
+                <div class="lg:col-span-5 flex justify-center">
+                    <div class="relative w-full max-w-md aspect-square rounded-3xl glass-card p-4 border border-brand-blue/20 shadow-glow-sm overflow-hidden group">
+                        <div class="w-full h-full rounded-2xl bg-brand-card overflow-hidden relative flex items-center justify-center">
+                            <img src="hero-img.jpg" alt="Hashir Creative Work" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80';">
+                            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-transparent to-transparent opacity-80"></div>
+                            
+                            <!-- Floating Badge -->
+                            <div class="absolute bottom-6 left-6 right-6 glass-card p-4 rounded-xl border border-white/10 backdrop-blur-md">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-syne font-bold text-white text-base">HX CAPTURE</h4>
+                                        <p class="text-xs text-slate-400">Visuals & Cinematic Edits</p>
+                                    </div>
+                                    <span class="w-8 h-8 rounded-full bg-brand-blue/20 text-brand-blue flex items-center justify-center text-sm">
+                                        <i class="fa-solid fa-play"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-card rounded-3xl p-8 sm:p-12 border border-brand-border reveal">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    
+                    <div class="lg:col-span-5 space-y-6">
+                        <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">About Me</span>
+                        <h2 class="font-syne text-3xl sm:text-4xl font-bold text-white">
+                            Crafting Stories Through <span class="text-brand-blue">Lens & Timeline</span>
+                        </h2>
+                        <p class="text-slate-300 leading-relaxed">
+                            Hi, I'm Hashir, the mind behind <strong class="text-white">HX CAPTURE</strong>. I specialize in turning raw footage into high-energy content, capturing striking photos, and crafting bold graphic visuals.
+                        </p>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Whether it's an intense reel edit, commercial branding, or professional photography, my focus is always on storytelling, crisp aesthetics, and detail perfection.
+                        </p>
+                    </div>
+
+                    <div class="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div class="glass-card p-6 rounded-2xl border border-white/5 text-center">
+                            <h3 class="font-syne text-3xl font-extrabold text-brand-blue mb-1">3+</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Years Experience</p>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl border border-white/5 text-center">
+                            <h3 class="font-syne text-3xl font-extrabold text-brand-blue mb-1">50+</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Projects Completed</p>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl border border-white/5 text-center col-span-2 sm:col-span-1">
+                            <h3 class="font-syne text-3xl font-extrabold text-brand-blue mb-1">100%</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Client Satisfaction</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Portfolio</span>
+                <h2 class="font-syne text-3xl sm:text-5xl font-bold text-white">Recent Work Showcase</h2>
+                <p class="text-slate-400">Explore selected video edits, photos, and graphic design projects.</p>
+            </div>
+
+            <!-- Portfolio Grid (managed from Admin) -->
+            <div id="portfolio-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 reveal"></div>
+        </div>
+    </section>
+
+    <!-- Achievements & Certificates Section -->
+    <section id="achievements" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Achievements</span>
+                <h2 class="font-syne text-3xl sm:text-5xl font-bold text-white">Certificates & Achievements</h2>
+                <p class="text-slate-400">A collection of certifications, courses, awards, and creative milestones.</p>
+            </div>
+            <div id="achievements-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 reveal"></div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-24 relative bg-brand-card/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Services</span>
+                <h2 class="font-syne text-3xl sm:text-5xl font-bold text-white">What I Bring To The Table</h2>
+                <p class="text-slate-400">Tailored creative services designed to elevate your brand's digital presence.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal">
+                <!-- Service 1 -->
+                <div class="glass-card p-8 rounded-3xl border border-brand-border hover:border-brand-blue/50 transition-all duration-300 group">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-film"></i>
+                    </div>
+                    <h3 class="font-syne text-2xl font-bold text-white mb-3">Video Editing</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Reels, YouTube edits, short films, commercials, color grading, sound design, and seamless transitions.
+                    </p>
+                </div>
+
+                <!-- Service 2 -->
+                <div class="glass-card p-8 rounded-3xl border border-brand-border hover:border-brand-blue/50 transition-all duration-300 group">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <h3 class="font-syne text-2xl font-bold text-white mb-3">Photography</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Event coverage, product photoshoots, automotive photography, and professional image retouching.
+                    </p>
+                </div>
+
+                <!-- Service 3 -->
+                <div class="glass-card p-8 rounded-3xl border border-brand-border hover:border-brand-blue/50 transition-all duration-300 group">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="font-syne text-2xl font-bold text-white mb-3">Graphic Design</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
+                        Social media graphics, thumbnails, posters, brand identity assets, logos, and UI layout conceptualization.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Skills & Tools</span>
+                <h2 class="font-syne text-3xl sm:text-5xl font-bold text-white">Software Mastery</h2>
+                <p class="text-slate-400">Industry-standard applications I use to craft high-quality assets.</p>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 reveal">
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-3 hover:border-brand-blue/40 transition-colors">
+                    <i class="fa-solid fa-video text-brand-blue text-3xl"></i>
+                    <span class="font-bold text-sm text-slate-200">Premiere Pro</span>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-3 hover:border-brand-blue/40 transition-colors">
+                    <i class="fa-solid fa-bolt text-brand-blue text-3xl"></i>
+                    <span class="font-bold text-sm text-slate-200">After Effects</span>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-3 hover:border-brand-blue/40 transition-colors">
+                    <i class="fa-solid fa-image text-brand-blue text-3xl"></i>
+                    <span class="font-bold text-sm text-slate-200">Photoshop</span>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-3 hover:border-brand-blue/40 transition-colors">
+                    <i class="fa-solid fa-sliders text-brand-blue text-3xl"></i>
+                    <span class="font-bold text-sm text-slate-200">Lightroom</span>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-3 hover:border-brand-blue/40 transition-colors">
+                    <i class="fa-solid fa-bezier-curve text-brand-blue text-3xl"></i>
+                    <span class="font-bold text-sm text-slate-200">Illustrator</span>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-white/5 flex flex-col items-center justify-center gap-3 hover:border-brand-blue/40 transition-colors">
+                    <i class="fa-solid fa-clapperboard text-brand-blue text-3xl"></i>
+                    <span class="font-bold text-sm text-slate-200">CapCut Pro</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section id="workflow" class="py-24 relative bg-brand-card/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Workflow</span>
+                <h2 class="font-syne text-3xl sm:text-5xl font-bold text-white">How I Work</h2>
+                <p class="text-slate-400">A structured process ensuring efficiency, transparency, and stellar results.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 reveal">
+                <div class="glass-card p-6 rounded-2xl border border-brand-border relative">
+                    <span class="font-syne text-5xl font-extrabold text-brand-blue/20 absolute top-4 right-4">01</span>
+                    <h4 class="font-syne text-xl font-bold text-white mb-2">Discovery</h4>
+                    <p class="text-slate-400 text-sm">Understanding goals, target audience, style preferences, and project specs.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-brand-border relative">
+                    <span class="font-syne text-5xl font-extrabold text-brand-blue/20 absolute top-4 right-4">02</span>
+                    <h4 class="font-syne text-xl font-bold text-white mb-2">Conceptualization</h4>
+                    <p class="text-slate-400 text-sm">Storyboarding, selecting music, gathering assets, and planning key cuts.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-brand-border relative">
+                    <span class="font-syne text-5xl font-extrabold text-brand-blue/20 absolute top-4 right-4">03</span>
+                    <h4 class="font-syne text-xl font-bold text-white mb-2">Creation & Edit</h4>
+                    <p class="text-slate-400 text-sm">Editing timelines, sound design, color grading, motion graphics, or shooting.</p>
+                </div>
+                <div class="glass-card p-6 rounded-2xl border border-brand-border relative">
+                    <span class="font-syne text-5xl font-extrabold text-brand-blue/20 absolute top-4 right-4">04</span>
+                    <h4 class="font-syne text-xl font-bold text-white mb-2">Delivery</h4>
+                    <p class="text-slate-400 text-sm">Revisions based on feedback, followed by final export in pristine quality.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials / Reviews Section -->
+    <section id="testimonials" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16 space-y-4 reveal">
+                <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Reviews</span>
+                <h2 class="font-syne text-3xl sm:text-5xl font-bold text-white">Client Feedback</h2>
+                <p class="text-slate-400">What collaborators and clients have to say about working with HX CAPTURE.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 reveal">
+                <div class="glass-card p-8 rounded-3xl border border-brand-border space-y-4">
+                    <div class="flex text-amber-400 gap-1 text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed">"Hashir delivered our promo edit ahead of schedule! The pacing, music sync, and color grading were spot-on."</p>
+                    <div class="pt-2">
+                        <h5 class="font-bold text-white text-sm">Alex M.</h5>
+                        <p class="text-xs text-slate-400">Content Creator</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl border border-brand-border space-y-4">
+                    <div class="flex text-amber-400 gap-1 text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed">"HX CAPTURE handled our brand photography shoot with incredible professionalism. The images came out ultra crisp!"</p>
+                    <div class="pt-2">
+                        <h5 class="font-bold text-white text-sm">Sarah K.</h5>
+                        <p class="text-xs text-slate-400">Brand Strategist</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl border border-brand-border space-y-4">
+                    <div class="flex text-amber-400 gap-1 text-sm">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-slate-300 text-sm leading-relaxed">"Super quick turnarounds for poster graphics and thumbnail design. Highly recommended for anyone needing top-tier visuals."</p>
+                    <div class="pt-2">
+                        <h5 class="font-bold text-white text-sm">David R.</h5>
+                        <p class="text-xs text-slate-400">Agency Founder</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-24 relative bg-brand-card/20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 reveal">
+                
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="text-brand-blue text-sm font-semibold tracking-widest uppercase">Contact</span>
+                    <h2 class="font-syne text-4xl sm:text-5xl font-bold text-white">Let's Build Something <span class="text-brand-blue">Epic Together</span></h2>
+                    <p class="text-slate-400">Have a project in mind, need a quick edit, or want to collaborate? Drop me a message below!</p>
+                    
+                    <div class="space-y-4 pt-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-brand-card border border-brand-border flex items-center justify-center text-brand-blue">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase">Email</p>
+                                <a href="mailto:muhammedhashir504@gmail.com" class="text-white font-medium hover:text-brand-blue transition-colors">muhammedhashir504@gmail.com</a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-brand-card border border-brand-border flex items-center justify-center text-brand-blue">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase">Phone</p>
+                                <a href="tel:+917025730877" class="text-white font-medium hover:text-brand-blue transition-colors">+91 70257 30877</a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-brand-card border border-brand-border flex items-center justify-center text-brand-blue">
+                                <i class="fa-brands fa-instagram"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase">Instagram</p>
+                                <a href="https://www.instagram.com/hxcapture/" target="_blank" rel="noopener noreferrer" class="text-white font-medium hover:text-brand-blue transition-colors">@hxcapture</a>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-brand-card border border-brand-border flex items-center justify-center text-brand-blue">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 uppercase">Location</p>
+                                <p class="text-white font-medium">Kerala, India</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7">
+                    <form id="contact-form" class="glass-card p-8 rounded-3xl border border-brand-border space-y-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Your Name</label>
+                                <input type="text" id="name" name="name" required placeholder="John Doe" class="w-full bg-brand-dark/80 border border-brand-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Your Email</label>
+                                <input type="email" id="email" name="email" required placeholder="john@example.com" class="w-full bg-brand-dark/80 border border-brand-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Service Needed</label>
+                            <select id="service" name="service" class="w-full bg-brand-dark/80 border border-brand-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors text-sm">
+                                <option value="Video Editing">Video Editing</option>
+                                <option value="Photography">Photography</option>
+                                <option value="Graphic Design">Graphic Design</option>
+                                <option value="Full Creative Collaboration">Full Creative Collaboration</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Message</label>
+                            <textarea id="message" name="message" rows="4" required placeholder="Tell me about your project..." class="w-full bg-brand-dark/80 border border-brand-border rounded-xl px-4 py-3 text-white focus:outline-none focus:border-brand-blue transition-colors text-sm resize-none"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl bg-gradient-to-r from-brand-blue to-brand-deepBlue text-black font-bold hover:shadow-glow-md transition-all duration-300">
+                            Send Message
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Admin Login & Portfolio Manager -->
+    <div id="hxcapture-modal" class="hxcapture-modal fixed inset-0 z-[100] items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-3xl border border-brand-blue/20 shadow-glow-lg">
+            <div class="sticky top-0 z-10 bg-[#0A0C10]/95 backdrop-blur-md p-5 sm:p-6 border-b border-brand-border flex items-center justify-between">
+                <div>
+                    <p class="text-brand-blue text-xs font-semibold uppercase tracking-widest">HX CAPTURE</p>
+                    <h2 class="font-syne text-2xl sm:text-3xl font-bold text-white">Admin Media Manager</h2>
+                </div>
+                <button id="hxcapture-close" type="button" class="w-10 h-10 rounded-xl border border-brand-border text-slate-300 hover:text-white hover:border-brand-blue">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Login -->
+            <div id="hxcapture-login-view" class="p-6 sm:p-10 max-w-md mx-auto">
+                <div class="text-center mb-7">
+                    <div class="mx-auto w-16 h-16 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue flex items-center justify-center text-2xl mb-4">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-syne text-2xl font-bold text-white">Admin Login</h3>
+                    <p class="text-slate-400 text-sm mt-2">Manage your portfolio and achievements from any phone or PC.</p>
+                </div>
+                <form id="hxcapture-login-form" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Admin ID or Email</label>
+                        <input id="hxcapture-username" class="hxcapture-input" type="text" autocomplete="username" placeholder="hxcapture or admin email" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Password</label>
+                        <input id="hxcapture-password" class="hxcapture-input" type="password" autocomplete="current-password" placeholder="Admin password" required>
+                    </div>
+                    <p id="hxcapture-login-error" class="hidden text-sm text-red-400"></p>
+                    <button class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-deepBlue text-black font-bold hover:shadow-glow-md" type="submit">
+                        <i class="fa-solid fa-right-to-bracket mr-2"></i>Login
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="hxcapture-dashboard" class="hidden p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
+                    <div>
+                        <h3 class="font-syne text-2xl font-bold text-white">Portfolio Media</h3>
+                        <p class="text-slate-400 text-sm">Add, edit, replace or remove selected media cards.</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="hxcapture-add-btn" type="button" class="px-4 py-2.5 rounded-xl bg-brand-blue text-black font-bold">
+                            <i class="fa-solid fa-plus mr-2"></i>Add Media
+                        </button>
+                        <button id="hxcapture-logout-btn" type="button" class="px-4 py-2.5 rounded-xl border border-red-500/40 text-red-300 hover:bg-red-500/10 font-semibold">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+                <div id="hxcapture-media-list" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+
+                <div class="mt-12 pt-8 border-t border-brand-border">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h3 class="font-syne text-2xl font-bold text-white">Achievements & Certificates</h3>
+                            <p class="text-slate-400 text-sm">Upload certificates, course completions, awards, and edit or remove them anytime.</p>
+                        </div>
+                        <button id="hxcapture-add-achievement-btn" type="button" class="px-4 py-2.5 rounded-xl bg-brand-blue text-black font-bold">
+                            <i class="fa-solid fa-certificate mr-2"></i>Add Achievement
+                        </button>
+                    </div>
+                    <div id="hxcapture-achievement-list" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Media Modal -->
+    <div id="media-editor-modal" class="hidden fixed inset-0 z-[110] items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl border border-brand-blue/20">
+            <div class="p-5 sm:p-7 border-b border-brand-border flex items-center justify-between">
+                <div>
+                    <p class="text-brand-blue text-xs font-semibold uppercase tracking-widest">Portfolio</p>
+                    <h3 id="media-editor-title" class="font-syne text-2xl font-bold text-white">Add Media</h3>
+                </div>
+                <button id="media-editor-close" type="button" class="w-10 h-10 rounded-xl border border-brand-border text-slate-300 hover:text-white hover:border-brand-blue">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="media-editor-form" class="p-5 sm:p-7 space-y-5">
+                <input id="media-id" type="hidden">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Title</label>
+                    <input id="media-title" class="hxcapture-input" required placeholder="Cinematic Promo Commercial">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Category</label>
+                    <select id="media-category" class="hxcapture-input">
+                        <option>Video Editing</option>
+                        <option>Photography</option>
+                        <option>Graphic Design</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Description</label>
+                    <textarea id="media-description" class="hxcapture-input resize-none" rows="3" placeholder="Describe this project..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Photo / Thumbnail</label>
+                    <input id="media-file" type="file" accept="image/*" class="w-full text-sm text-slate-300 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-brand-blue file:text-black file:font-bold">
+                    <p class="text-xs text-slate-500 mt-2">Images are uploaded securely to Supabase Storage and are available on every device.</p>
+                </div>
+                <div id="media-preview-wrap" class="hidden">
+                    <img id="media-preview" class="hxcapture-preview" alt="Media preview">
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-deepBlue text-black font-bold">Save Media</button>
+                    <button id="media-editor-cancel" type="button" class="px-6 py-3.5 rounded-xl border border-brand-border text-white font-semibold">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Achievement Modal -->
+    <div id="achievement-editor-modal" class="hidden fixed inset-0 z-[115] items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+        <div class="glass-card w-full max-w-2xl max-h-[92vh] overflow-y-auto rounded-3xl border border-brand-blue/20">
+            <div class="p-5 sm:p-7 border-b border-brand-border flex items-center justify-between">
+                <div>
+                    <p class="text-brand-blue text-xs font-semibold uppercase tracking-widest">Achievements</p>
+                    <h3 id="achievement-editor-title" class="font-syne text-2xl font-bold text-white">Add Achievement</h3>
+                </div>
+                <button id="achievement-editor-close" type="button" class="w-10 h-10 rounded-xl border border-brand-border text-slate-300 hover:text-white hover:border-brand-blue"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="achievement-editor-form" class="p-5 sm:p-7 space-y-5">
+                <input id="achievement-id" type="hidden">
+                <div><label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Certificate / Achievement Title</label><input id="achievement-title" class="hxcapture-input" required placeholder="Advanced Video Editing Certificate"></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Course / Organization</label><input id="achievement-issuer" class="hxcapture-input" placeholder="GTEC Kasaragod"></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div><label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Year</label><input id="achievement-year" class="hxcapture-input" placeholder="2026"></div>
+                    <div><label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Type</label><select id="achievement-type" class="hxcapture-input"><option>Certificate</option><option>Course</option><option>Award</option><option>Achievement</option></select></div>
+                </div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Description</label><textarea id="achievement-description" class="hxcapture-input resize-none" rows="3" placeholder="Short description about this certificate or achievement..."></textarea></div>
+                <div><label class="block text-xs font-semibold uppercase text-slate-300 mb-2">Certificate Image</label><input id="achievement-file" type="file" accept="image/*" class="w-full text-sm text-slate-300 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-brand-blue file:text-black file:font-bold"><p class="text-xs text-slate-500 mt-2">Images are uploaded securely to Supabase Storage and are available on every device.</p></div>
+                <div id="achievement-preview-wrap" class="hidden"><img id="achievement-preview" class="w-full aspect-[4/3] object-cover rounded-xl border border-white/10" alt="Certificate preview"></div>
+                <div class="flex gap-3 pt-2"><button type="submit" class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-brand-blue to-brand-deepBlue text-black font-bold">Save Achievement</button><button id="achievement-editor-cancel" type="button" class="px-6 py-3.5 rounded-xl border border-brand-border text-white font-semibold">Cancel</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-brand-border glass-nav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-blue/20 text-brand-blue flex items-center justify-center font-syne font-bold text-sm">HX</div>
+                <span class="font-syne font-bold text-white">HX CAPTURE</span>
+                <span class="text-xs text-slate-500">&copy; <span id="year"></span> Hashir. All Rights Reserved.</span>
+            </div>
+
+            <div class="flex gap-6 text-slate-400 text-lg">
+                <a href="https://www.instagram.com/hxcapture/" target="_blank" rel="noopener noreferrer" class="hover:text-brand-blue transition-colors" aria-label="Instagram @hxcapture"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-brand-blue transition-colors" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" class="hover:text-brand-blue transition-colors" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#" class="hover:text-brand-blue transition-colors" aria-label="Behance"><i class="fa-brands fa-behance"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- EmailJS: sends contact form messages to your configured inbox without FormSubmit -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- JavaScript Interactivity -->
+    <script>
+        // Set dynamic copyright year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        mobileNavLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Contact Form Handling with EmailJS
+        // IMPORTANT: replace these 3 values with the IDs from your EmailJS dashboard.
+        const EMAILJS_PUBLIC_KEY = 'x5CIB1JXQtjdkdzIfro7I';
+        const EMAILJS_SERVICE_ID = 'service_m3np0qo';
+        const EMAILJS_TEMPLATE_ID = 'template_c2v3rjm';
+
+        const contactForm = document.getElementById('contact-form');
+        const toast = document.getElementById('toast');
+
+        if (EMAILJS_PUBLIC_KEY !== 'x5CIB1JXQtjdkdzIfro7I') {
+            emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+        }
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending...';
+
+            const showToast = (message) => {
+                toast.querySelector('#toast-message').textContent = message;
+                toast.classList.remove('translate-y-20', 'opacity-0');
+                toast.classList.add('translate-y-0', 'opacity-100');
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-y-20', 'opacity-0');
+                }, 4500);
+            };
+
+            try {
+                if (EMAILJS_PUBLIC_KEY === 'x5CIB1JXQtjdkdzIfro7I' ||
+                    EMAILJS_SERVICE_ID === 'service_m3np0qo' ||
+                    EMAILJS_TEMPLATE_ID === 'template_c2v3rjm') {
+                    throw new Error('EmailJS is not configured yet.');
+                }
+
+                await emailjs.sendForm(
+                    EMAILJS_SERVICE_ID,
+                    EMAILJS_TEMPLATE_ID,
+                    contactForm
+                );
+
+                showToast("Message sent successfully! I\'ll get back to you soon.");
+                contactForm.reset();
+            } catch (error) {
+                console.error('EmailJS error:', error);
+                showToast('Message could not be sent. Please try again or contact me directly.');
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            }
+        });
+
+        // Reveal Animations on Scroll
+        const reveals = document.querySelectorAll('.reveal');
+
+        function checkScroll() {
+            const windowHeight = window.innerHeight;
+            reveals.forEach(el => {
+                const elementTop = el.getBoundingClientRect().top;
+                if (elementTop < windowHeight - 100) {
+                    el.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', checkScroll);
+        window.addEventListener('load', checkScroll);
+
+
+        // ============================
+        // HX CAPTURE ONLINE ADMIN SYSTEM — SUPABASE
+        // ============================
+        // Create a Supabase project, run the supplied SQL setup, then paste these two values here.
+        const SUPABASE_URL = "YOUR_SUPABASE_URL";
+        const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+        const ADMIN_LOGIN_ID = "hxcapture";
+        const ADMIN_EMAIL = "muhammedhashir504@gmail.com";
+        const STORAGE_BUCKET = "hx-capture-media";
+        const ADMIN_SESSION_KEY = "hx_capture_supabase_session";
+
+        const supabaseConfigured =
+            SUPABASE_URL !== "YOUR_SUPABASE_URL" &&
+            SUPABASE_ANON_KEY !== "YOUR_SUPABASE_ANON_KEY" &&
+            window.supabase;
+
+        const sb = supabaseConfigured
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+            })
+            : null;
+
+        const defaultAchievements = [];
+        const defaultMedia = [
+            { id: "work-1", title: "Cinematic Promo Commercial", category: "Video Editing", description: "Dynamic cuts, color grading, sound design, and motion graphics.", image: "work1.jpg" },
+            { id: "work-2", title: "Automotive & Lifestyle Shoot", category: "Photography", description: "High-contrast framing, mood lighting, and detailed retouching.", image: "work2.jpg" },
+            { id: "work-3", title: "Brand Identity & Poster Art", category: "Graphic Design", description: "Modern poster layouts, social media kits, and typography systems.", image: "work3.jpg" }
+        ];
+
+        let mediaCache = null;
+        let achievementCache = null;
+
+        function isOnlineAdminReady() {
+            return Boolean(sb);
+        }
+
+        function setLoginError(message = "") {
+            hxcaptureLoginError.textContent = message;
+            hxcaptureLoginError.classList.toggle("hidden", !message);
+        }
+
+        async function getCurrentUser() {
+            if (!sb) return null;
+            const { data, error } = await sb.auth.getUser();
+            if (error) return null;
+            return data?.user || null;
+        }
+
+        async function getMedia() {
+            if (!sb) return [...defaultMedia];
+            const { data, error } = await sb.from("portfolio_media").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
+            if (error) {
+                console.error("Portfolio load error:", error);
+                return mediaCache || [];
+            }
+            mediaCache = (data || []).map(row => ({
+                id: row.id,
+                title: row.title,
+                category: row.category,
+                description: row.description || "",
+                image: row.image_url || "",
+                storagePath: row.storage_path || ""
+            }));
+            return mediaCache;
+        }
+
+        async function getAchievements() {
+            if (!sb) return [...defaultAchievements];
+            const { data, error } = await sb.from("achievements").select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: true });
+            if (error) {
+                console.error("Achievement load error:", error);
+                return achievementCache || [];
+            }
+            achievementCache = (data || []).map(row => ({
+                id: row.id,
+                title: row.title,
+                issuer: row.issuer || "",
+                year: row.year || "",
+                type: row.type || "Certificate",
+                description: row.description || "",
+                image: row.image_url || "",
+                storagePath: row.storage_path || ""
+            }));
+            return achievementCache;
+        }
+
+        function renderAchievements(items = achievementCache || []) {
+            const grid = document.getElementById("achievements-grid");
+            if (!grid) return;
+            if (!items.length) {
+                grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-10">Add your certificates and achievements from the Admin panel.</div>';
+                return;
+            }
+            grid.innerHTML = items.map(item => `
+                <article class="achievement-card glass-card rounded-3xl overflow-hidden border border-brand-border">
+                    <div class="bg-brand-card relative overflow-hidden">
+                        ${item.image ? `<img src="${item.image}" alt="${escapeHtml(item.title)}" class="achievement-image w-full">` : `<div class="achievement-image w-full flex items-center justify-center text-brand-blue"><i class="fa-solid fa-certificate text-6xl"></i></div>`}
+                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-brand-dark/85 backdrop-blur-md text-brand-blue text-xs font-semibold">${escapeHtml(item.type)}</span>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start justify-between gap-3"><div><h3 class="font-syne text-xl font-bold text-white">${escapeHtml(item.title)}</h3><p class="text-brand-blue text-sm font-semibold mt-1">${escapeHtml(item.issuer || "HX CAPTURE")}</p></div>${item.year ? `<span class="text-xs text-slate-500 font-semibold whitespace-nowrap">${escapeHtml(item.year)}</span>` : ""}</div>
+                        <p class="text-slate-400 text-sm leading-relaxed mt-3">${escapeHtml(item.description || "")}</p>
+                    </div>
+                </article>`).join("");
+        }
+
+        async function refreshAchievements() {
+            const items = await getAchievements();
+            renderAchievements(items);
+            if (!hxcaptureDashboard.classList.contains("hidden")) renderAdminAchievements(items);
+            return items;
+        }
+
+        async function renderAdminAchievements(items = null) {
+            const list = document.getElementById("hxcapture-achievement-list");
+            if (!list) return;
+            const records = items || await getAchievements();
+            if (!records.length) { list.innerHTML = '<p class="text-slate-500 text-sm">No achievements yet. Click Add Achievement.</p>'; return; }
+            list.innerHTML = records.map(item => `
+                <div class="hxcapture-item rounded-2xl p-4"><div class="flex gap-4"><div class="w-28 h-20 rounded-xl overflow-hidden bg-brand-card shrink-0">${item.image ? `<img src="${item.image}" class="w-full h-full object-cover" alt="">` : `<div class="w-full h-full flex items-center justify-center text-brand-blue"><i class="fa-solid fa-certificate text-2xl"></i></div>`}</div><div class="min-w-0 flex-1"><div class="flex items-center gap-2"><span class="text-brand-blue text-xs font-semibold">${escapeHtml(item.type)}</span><span class="text-slate-600">•</span><span class="text-slate-500 text-xs">${escapeHtml(item.year || "")}</span></div><h4 class="font-syne font-bold text-white truncate mt-1">${escapeHtml(item.title)}</h4><p class="text-slate-400 text-xs mt-1 truncate">${escapeHtml(item.issuer || "")}</p></div></div><div class="grid grid-cols-2 gap-2 mt-4"><button type="button" class="hxcapture-achievement-edit px-3 py-2 rounded-xl border border-brand-blue/30 text-brand-blue text-sm font-semibold" data-id="${item.id}"><i class="fa-solid fa-pen mr-1"></i>Edit / Replace</button><button type="button" class="hxcapture-achievement-delete px-3 py-2 rounded-xl border border-red-500/30 text-red-300 text-sm font-semibold" data-id="${item.id}"><i class="fa-solid fa-trash mr-1"></i>Delete</button></div></div>`).join("");
+            list.querySelectorAll(".hxcapture-achievement-edit").forEach(btn => btn.addEventListener("click", () => openAchievementEditor(btn.dataset.id)));
+            list.querySelectorAll(".hxcapture-achievement-delete").forEach(btn => btn.addEventListener("click", async () => {
+                const item = (achievementCache || []).find(x => x.id === btn.dataset.id);
+                if (!item || !confirm(`Delete "${item.title}"?`)) return;
+                await deleteAchievement(item);
+            }));
+        }
+
+        const categoryIcons = {
+            "Video Editing": "fa-film",
+            "Photography": "fa-camera",
+            "Graphic Design": "fa-wand-magic-sparkles",
+            "Other": "fa-image"
+        };
+
+        async function renderPortfolio(items = null) {
+            const grid = document.getElementById("portfolio-grid");
+            if (!grid) return;
+            const records = items || await getMedia();
+            if (!records.length) {
+                grid.innerHTML = `<div class="col-span-full glass-card rounded-2xl p-10 text-center border border-brand-border"><i class="fa-solid fa-images text-brand-blue text-4xl mb-4"></i><h3 class="font-syne text-xl font-bold text-white">No portfolio media yet</h3><p class="text-slate-400 mt-2">Login as hxcapture and add your first project.</p></div>`;
+                return;
+            }
+            grid.innerHTML = records.map(item => {
+                const icon = categoryIcons[item.category] || "fa-image";
+                const safeTitle = escapeHtml(item.title);
+                const safeDescription = escapeHtml(item.description);
+                const safeCategory = escapeHtml(item.category);
+                const fallback = "https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=800&q=80";
+                return `<div class="glass-card rounded-2xl overflow-hidden border border-brand-border group hover:border-brand-blue/40 transition-all duration-300"><div class="relative aspect-video overflow-hidden bg-brand-card"><img src="${item.image}" alt="${safeTitle}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null;this.src='${fallback}';"><div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div><span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-brand-dark/80 backdrop-blur-md text-brand-blue text-xs font-semibold"><i class="fa-solid ${icon} mr-1"></i>${safeCategory}</span></div><div class="p-6 space-y-2"><h3 class="font-syne text-xl font-bold text-white group-hover:text-brand-blue transition-colors">${safeTitle}</h3><p class="text-slate-400 text-sm">${safeDescription}</p></div></div>`;
+            }).join("");
+        }
+
+        async function renderAdminMedia(items = null) {
+            const list = document.getElementById("hxcapture-media-list");
+            if (!list) return;
+            const records = items || await getMedia();
+            if (!records.length) { list.innerHTML = '<p class="text-slate-500 text-sm">No portfolio media yet. Click Add Media.</p>'; return; }
+            list.innerHTML = records.map(item => `
+                <div class="hxcapture-item rounded-2xl p-4"><div class="flex gap-4"><img src="${item.image}" alt="${escapeHtml(item.title)}" class="w-28 h-20 sm:w-36 sm:h-24 rounded-xl object-cover border border-white/10"><div class="min-w-0 flex-1"><span class="text-brand-blue text-[10px] font-bold uppercase tracking-widest">${escapeHtml(item.category)}</span><h4 class="font-syne font-bold text-white truncate mt-1">${escapeHtml(item.title)}</h4><p class="text-slate-400 text-xs mt-1 line-clamp-2">${escapeHtml(item.description)}</p></div></div><div class="grid grid-cols-2 gap-2 mt-4"><button type="button" class="hxcapture-edit px-3 py-2 rounded-xl border border-brand-blue/30 text-brand-blue text-sm font-semibold" data-id="${item.id}"><i class="fa-solid fa-pen mr-1"></i>Edit / Replace</button><button type="button" class="hxcapture-delete px-3 py-2 rounded-xl border border-red-500/30 text-red-300 text-sm font-semibold" data-id="${item.id}"><i class="fa-solid fa-trash mr-1"></i>Delete</button></div></div>`).join("");
+            list.querySelectorAll(".hxcapture-edit").forEach(btn => btn.addEventListener("click", () => openMediaEditor(btn.dataset.id)));
+            list.querySelectorAll(".hxcapture-delete").forEach(btn => btn.addEventListener("click", async () => {
+                const item = (mediaCache || []).find(x => x.id === btn.dataset.id);
+                if (!item || !confirm(`Delete "${item.title}" from the portfolio?`)) return;
+                await deleteMedia(item);
+            }));
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[char]));
+        }
+
+        async function uploadImage(file, folder) {
+            if (!sb) throw new Error("Supabase is not configured.");
+            if (!file || !file.type.startsWith("image/")) throw new Error("Please select an image file.");
+            const maxBytes = 8 * 1024 * 1024;
+            if (file.size > maxBytes) throw new Error("Please use an image smaller than 8 MB.");
+            const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+            const path = `${folder}/${crypto.randomUUID()}.${extension || "jpg"}`;
+            const { error } = await sb.storage.from(STORAGE_BUCKET).upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+            if (error) throw error;
+            const { data } = sb.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+            return { path, url: data.publicUrl };
+        }
+
+        async function removeStorageFile(path) {
+            if (!sb || !path) return;
+            const { error } = await sb.storage.from(STORAGE_BUCKET).remove([path]);
+            if (error) console.warn("Storage delete warning:", error);
+        }
+
+        async function deleteMedia(item) {
+            const { error } = await sb.from("portfolio_media").delete().eq("id", item.id);
+            if (error) { alert(error.message); return; }
+            await removeStorageFile(item.storagePath);
+            mediaCache = (mediaCache || []).filter(x => x.id !== item.id);
+            await renderPortfolio(mediaCache);
+            await renderAdminMedia(mediaCache);
+            showToast("Portfolio media deleted.");
+        }
+
+        async function deleteAchievement(item) {
+            const { error } = await sb.from("achievements").delete().eq("id", item.id);
+            if (error) { alert(error.message); return; }
+            await removeStorageFile(item.storagePath);
+            achievementCache = (achievementCache || []).filter(x => x.id !== item.id);
+            renderAchievements(achievementCache);
+            await renderAdminAchievements(achievementCache);
+            showToast("Achievement deleted.");
+        }
+
+        const hxcaptureModal = document.getElementById("hxcapture-modal");
+        const hxcaptureLoginView = document.getElementById("hxcapture-login-view");
+        const hxcaptureDashboard = document.getElementById("hxcapture-dashboard");
+        const hxcaptureLoginForm = document.getElementById("hxcapture-login-form");
+        const hxcaptureLoginError = document.getElementById("hxcapture-login-error");
+        const mediaEditorModal = document.getElementById("media-editor-modal");
+        const mediaEditorForm = document.getElementById("media-editor-form");
+        const achievementEditorModal = document.getElementById("achievement-editor-modal");
+        const achievementEditorForm = document.getElementById("achievement-editor-form");
+
+        function openAdmin() {
+            hxcaptureModal.classList.add("active");
+            document.body.classList.add("overflow-hidden");
+            if (!isOnlineAdminReady()) { showAdminLogin(); setLoginError("Online admin is not connected yet. Add your Supabase URL and anon key to this file first."); return; }
+            getCurrentUser().then(user => user ? showAdminDashboard() : showAdminLogin());
+        }
+        function closeAdmin() { hxcaptureModal.classList.remove("active"); document.body.classList.remove("overflow-hidden"); }
+        function showAdminLogin() { hxcaptureLoginView.classList.remove("hidden"); hxcaptureDashboard.classList.add("hidden"); }
+        async function showAdminDashboard() {
+            hxcaptureLoginView.classList.add("hidden"); hxcaptureDashboard.classList.remove("hidden");
+            await Promise.all([renderAdminMedia(), renderAdminAchievements()]);
+        }
+
+        document.getElementById("hxcapture-login-btn")?.addEventListener("click", openAdmin);
+        document.getElementById("hxcapture-login-btn-mobile")?.addEventListener("click", () => { mobileMenu.classList.add("hidden"); openAdmin(); });
+        document.getElementById("hxcapture-close")?.addEventListener("click", closeAdmin);
+        hxcaptureModal.addEventListener("click", e => { if (e.target === hxcaptureModal) closeAdmin(); });
+
+        hxcaptureLoginForm.addEventListener("submit", async e => {
+            e.preventDefault();
+            setLoginError("");
+            if (!sb) { setLoginError("Supabase is not configured yet."); return; }
+            const loginId = document.getElementById("hxcapture-username").value.trim();
+            const password = document.getElementById("hxcapture-password").value;
+            const email = loginId.toLowerCase() === ADMIN_LOGIN_ID ? ADMIN_EMAIL : loginId;
+            const button = hxcaptureLoginForm.querySelector("button[type='submit']");
+            const oldText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Signing in...';
+            const { error } = await sb.auth.signInWithPassword({ email, password });
+            button.disabled = false;
+            button.innerHTML = oldText;
+            if (error) { setLoginError("Login failed. Check your Admin ID/email and password."); return; }
+            hxcaptureLoginForm.reset();
+            showAdminDashboard();
+            showToast("Admin login successful.");
+        });
+
+        document.getElementById("hxcapture-logout-btn")?.addEventListener("click", async () => {
+            if (sb) await sb.auth.signOut();
+            showAdminLogin();
+            showToast("Admin logged out.");
+        });
+
+        if (sb) {
+            sb.auth.onAuthStateChange((_event, session) => {
+                if (session?.user && hxcaptureModal.classList.contains("active")) showAdminDashboard();
+                else if (!session?.user) showAdminLogin();
+            });
+        }
+
+        function openMediaEditor(id = "") {
+            mediaEditorModal.classList.remove("hidden"); mediaEditorModal.classList.add("flex");
+            document.getElementById("media-id").value = id;
+            const item = id ? (mediaCache || []).find(x => x.id === id) : null;
+            document.getElementById("media-editor-title").textContent = item ? "Edit / Replace Media" : "Add Media";
+            document.getElementById("media-title").value = item?.title || "";
+            document.getElementById("media-category").value = item?.category || "Video Editing";
+            document.getElementById("media-description").value = item?.description || "";
+            document.getElementById("media-file").value = "";
+            const preview = document.getElementById("media-preview");
+            if (item?.image) { preview.src = item.image; document.getElementById("media-preview-wrap").classList.remove("hidden"); }
+            else { preview.removeAttribute("src"); document.getElementById("media-preview-wrap").classList.add("hidden"); }
+        }
+        function closeMediaEditor() { mediaEditorModal.classList.add("hidden"); mediaEditorModal.classList.remove("flex"); mediaEditorForm.reset(); }
+        document.getElementById("hxcapture-add-btn")?.addEventListener("click", () => openMediaEditor());
+        document.getElementById("media-editor-close")?.addEventListener("click", closeMediaEditor);
+        document.getElementById("media-editor-cancel")?.addEventListener("click", closeMediaEditor);
+        document.getElementById("media-file").addEventListener("change", e => { const file=e.target.files[0]; if(!file) return; if(!file.type.startsWith("image/")){alert("Please select an image file.");e.target.value="";return;} const preview=document.getElementById("media-preview"); preview.src=URL.createObjectURL(file); document.getElementById("media-preview-wrap").classList.remove("hidden"); });
+
+        mediaEditorForm.addEventListener("submit", async e => {
+            e.preventDefault();
+            if (!sb) { alert("Supabase is not configured yet."); return; }
+            const id=document.getElementById("media-id").value;
+            const title=document.getElementById("media-title").value.trim();
+            const category=document.getElementById("media-category").value;
+            const description=document.getElementById("media-description").value.trim();
+            const file=document.getElementById("media-file").files[0];
+            const existing=id ? (mediaCache || []).find(x=>x.id===id) : null;
+            if(!title) return;
+            const button=mediaEditorForm.querySelector("button[type='submit']"); const oldText=button.innerHTML; button.disabled=true; button.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2"></i>Uploading...';
+            try {
+                let imageUrl=existing?.image || "", storagePath=existing?.storagePath || "";
+                if(file){ const upload=await uploadImage(file,"portfolio"); imageUrl=upload.url; storagePath=upload.path; }
+                if(!imageUrl) throw new Error("Please upload a photo/thumbnail.");
+                if(id){
+                    const { error }=await sb.from("portfolio_media").update({title,category,description,image_url:imageUrl,storage_path:storagePath,updated_at:new Date().toISOString()}).eq("id",id);
+                    if(error) throw error;
+                    if(file && existing?.storagePath && existing.storagePath!==storagePath) await removeStorageFile(existing.storagePath);
+                } else {
+                    const { error }=await sb.from("portfolio_media").insert({title,category,description,image_url:imageUrl,storage_path:storagePath,sort_order:(mediaCache||[]).length});
+                    if(error) throw error;
+                }
+                await renderPortfolio(); await renderAdminMedia(); closeMediaEditor(); showToast(id ? "Portfolio media updated online." : "Portfolio media added online.");
+            } catch(error){ console.error(error); alert(error.message || "Could not save media."); }
+            finally{ button.disabled=false; button.innerHTML=oldText; }
+        });
+        mediaEditorModal.addEventListener("click", e => { if(e.target===mediaEditorModal) closeMediaEditor(); });
+
+        function openAchievementEditor(id = "") {
+            achievementEditorModal.classList.remove("hidden"); achievementEditorModal.classList.add("flex");
+            document.getElementById("achievement-id").value = id;
+            const item = id ? (achievementCache || []).find(x => x.id === id) : null;
+            document.getElementById("achievement-editor-title").textContent = item ? "Edit / Replace Achievement" : "Add Achievement";
+            document.getElementById("achievement-title").value = item?.title || "";
+            document.getElementById("achievement-issuer").value = item?.issuer || "";
+            document.getElementById("achievement-year").value = item?.year || "";
+            document.getElementById("achievement-type").value = item?.type || "Certificate";
+            document.getElementById("achievement-description").value = item?.description || "";
+            document.getElementById("achievement-file").value = "";
+            const preview = document.getElementById("achievement-preview");
+            if(item?.image){ preview.src=item.image; document.getElementById("achievement-preview-wrap").classList.remove("hidden"); } else { preview.removeAttribute("src"); document.getElementById("achievement-preview-wrap").classList.add("hidden"); }
+        }
+        function closeAchievementEditor(){ achievementEditorModal.classList.add("hidden"); achievementEditorModal.classList.remove("flex"); achievementEditorForm.reset(); }
+        document.getElementById("hxcapture-add-achievement-btn")?.addEventListener("click", () => openAchievementEditor());
+        document.getElementById("achievement-editor-close")?.addEventListener("click", closeAchievementEditor);
+        document.getElementById("achievement-editor-cancel")?.addEventListener("click", closeAchievementEditor);
+        document.getElementById("achievement-file")?.addEventListener("change", e => { const file=e.target.files[0]; if(!file)return; if(!file.type.startsWith("image/")){alert("Please select an image file.");e.target.value="";return;} document.getElementById("achievement-preview").src=URL.createObjectURL(file);document.getElementById("achievement-preview-wrap").classList.remove("hidden"); });
+        achievementEditorForm.addEventListener("submit", async e => {
+            e.preventDefault();
+            if(!sb){alert("Supabase is not configured yet.");return;}
+            const id=document.getElementById("achievement-id").value,title=document.getElementById("achievement-title").value.trim(),issuer=document.getElementById("achievement-issuer").value.trim(),year=document.getElementById("achievement-year").value.trim(),type=document.getElementById("achievement-type").value,description=document.getElementById("achievement-description").value.trim(),file=document.getElementById("achievement-file").files[0],existing=id?(achievementCache||[]).find(x=>x.id===id):null;
+            if(!title)return;
+            const button=achievementEditorForm.querySelector("button[type='submit']");const oldText=button.innerHTML;button.disabled=true;button.innerHTML='<i class="fa-solid fa-spinner fa-spin mr-2"></i>Uploading...';
+            try{
+                let imageUrl=existing?.image||"",storagePath=existing?.storagePath||"";
+                if(file){const upload=await uploadImage(file,"achievements");imageUrl=upload.url;storagePath=upload.path;}
+                if(!imageUrl)throw new Error("Please upload the certificate image.");
+                if(id){const {error}=await sb.from("achievements").update({title,issuer,year,type,description,image_url:imageUrl,storage_path:storagePath,updated_at:new Date().toISOString()}).eq("id",id);if(error)throw error;if(file&&existing?.storagePath&&existing.storagePath!==storagePath)await removeStorageFile(existing.storagePath);}
+                else{const {error}=await sb.from("achievements").insert({title,issuer,year,type,description,image_url:imageUrl,storage_path:storagePath,sort_order:(achievementCache||[]).length});if(error)throw error;}
+                await refreshAchievements();closeAchievementEditor();showToast(id?"Achievement updated online.":"Achievement added online.");
+            }catch(error){console.error(error);alert(error.message||"Could not save achievement.");}finally{button.disabled=false;button.innerHTML=oldText;}
+        });
+        achievementEditorModal.addEventListener("click", e=>{if(e.target===achievementEditorModal)closeAchievementEditor();});
+
+        // Load public content from Supabase on every device.
+        if (sb) {
+            renderPortfolio();
+            refreshAchievements();
+        } else {
+            renderPortfolio(defaultMedia);
+            renderAchievements(defaultAchievements);
+        }
+
+        // Portfolio and achievements are loaded above.
+        // Custom Cursor Movement
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursor-dot');
+
+        if (window.innerWidth >= 1024) {
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                cursorDot.style.left = e.clientX + 'px';
+                cursorDot.style.top = e.clientY + 'px';
+            });
+            document.querySelectorAll('a, button, input, select, textarea, .achievement-card, .glass-card').forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('cursor-hover'));
+            });
+        }
+    </script>
+</body>
+</html>
