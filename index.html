@@ -794,9 +794,7 @@
         const contactForm = document.getElementById('contact-form');
         const toast = document.getElementById('toast');
 
-        if (EMAILJS_PUBLIC_KEY !== 'x5CIB1JXQtjdkdzIfro7I') {
-            emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-        }
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -817,9 +815,7 @@
             };
 
             try {
-                if (EMAILJS_PUBLIC_KEY === 'x5CIB1JXQtjdkdzIfro7I' ||
-                    EMAILJS_SERVICE_ID === 'service_m3np0qo' ||
-                    EMAILJS_TEMPLATE_ID === 'template_c2v3rjm') {
+                if (!EMAILJS_PUBLIC_KEY || !EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID) {
                     throw new Error('EmailJS is not configured yet.');
                 }
 
